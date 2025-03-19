@@ -4,6 +4,8 @@ import json
 
 class ToDoApp(ctk.CTk):
     """
+    ToDoApp: タスク管理
+
     title: 上部タイトル
     geometry: ウィンドウの初期サイズ
     ctk.set_appearance_mode: 背景の色
@@ -77,14 +79,15 @@ class ToDoApp(ctk.CTk):
             self.tasks = []
 
     def update_task_list(self):
+        #制作中、デイリーと長期の描画をここで分ける
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
         
         self.task_vars = []
         for task in self.tasks:
             var = ctk.BooleanVar()
-            chk = ctk.CTkCheckBox(self.scrollable_frame, text=task, variable=var)
-            chk.pack(anchor="w", padx=5, pady=2)
+            chk = ctk.CTkCheckBox(self.scrollable_frame, text=task, variable=var, width=200)
+            chk.pack(anchor="w", padx=10, pady=2)
             self.task_vars.append(var)
         
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
