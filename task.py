@@ -79,18 +79,50 @@ class ToDoApp(ctk.CTk):
             self.tasks = []
 
     def update_task_list(self):
-        #制作中、デイリーと長期の描画をここで分ける
+        #制作中、デイリー
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
         
         self.task_vars = []
-        for task in self.tasks:
+        for i, task in enumerate(self.tasks):
             var = ctk.BooleanVar()
             chk = ctk.CTkCheckBox(self.scrollable_frame, text=task, variable=var, width=200)
             chk.pack(anchor="w", padx=10, pady=2)
+            chk.bind("<ButtonPress-1>", lambda e, idx=i: self.on_drag(e, idx))
+            chk.bind("<B1-Motion>", lambda e: self.on_drag_move(e))
+            chk.bind("<ButtonRelease-1>", lambda e: self.on_drop())
             self.task_vars.append(var)
         
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+    def on_drag(self, event, index):
+        self.is_dragging = False
+        self.dragged_task_index = index
+        self.start_x = event.x
+        self.start_y = event.y
+        self.drag_threshold = 5  # これ以上動いたらドラッグと判定
+
+    def on_drag_move(self, event):
+        """ マウスが一定距離以上移動したらドラッグ判定 """
+        if self.dragged_task_index is None:
+            return
+
+        dx = abs(event.x - self.start_x)
+        dy = abs(event.y - self.start_y)
+        
+        if dx > self.drag_threshold or dy > self.drag_threshold:
+            self.is_dragging = True  # ここでドラッグが発生したことを判定
+
+    def on_drop(self):
+        """ ドロップ時にドラッグしていたら順番を変更 """
+        if self.dragged_task_index is not None and self.is_dragging:
+            old_index = self.dragged_task_index
+            new_index = len(self.tasks) - 1  # 例として最後に移動
+            self.tasks.insert(new_index, self.tasks.pop(old_index))
+            self.update_task_list()
+
+        self.dragged_task_index = None
+        self.is_dragging = False
 
 if __name__ == "__main__":
     app = ToDoApp()
